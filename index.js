@@ -34,6 +34,9 @@
  * @param payload a function to call with (acequire, exports, module) params
  */
 
+var bySetValue = false;
+
+
 (function() {
 
 var ACE_NAMESPACE = "ace";
@@ -3330,6 +3333,10 @@ EventEmitter._dispatchEvent = function(eventName, e) {
 
 
 EventEmitter._signal = function(eventName, e) {
+    if (eventName === 'change') {
+      e.bySetValue = bySetValue;
+    }
+
     var listeners = (this._eventRegistry || {})[eventName];
     if (!listeners)
         return;
@@ -6059,9 +6066,11 @@ var Document = function(text) {
 
     oop.implement(this, EventEmitter);
     this.setValue = function(text) {
+        bySetValue = true;
         var len = this.getLength();
         this.remove(new Range(0, 0, len, this.getLine(len-1).length));
         this.insert({row: 0, column:0}, text);
+        bySetValue = false;
     };
     this.getValue = function() {
         return this.getAllLines().join(this.getNewLineCharacter());
